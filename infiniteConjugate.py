@@ -2,7 +2,7 @@
 """
 INFINITE CONJUGATE IMAGING
 Ray tracing
-Created on Thu Nov 1 2018
+Created on Thu Nov 3 2018
 
 @author: Carmel Howe and Peter Quicke
 
@@ -31,7 +31,7 @@ font = {'family': 'sans',
 plt.rc('font',**font)
 
 #define displacement in z and location of image
-init_z = 0#1.5e-6 
+init_z = -10e-6 
 init_h = 0#2.5e-6 
 
 #system parameters
@@ -123,34 +123,6 @@ plt.show()
 #plt.show()
 
 
-############# Plot Tube to Sensor #################
-#fig = plt.gcf()
-#ax = plt.subplot(111)
-#
-#for a, i in zip(angle, color_idx):
-#    ax.plot([distTube,distMLA],[propagate_to_tube(init_h,a,init_z).height,
-#            propagate_to_sensor(init_h,a,init_z).height],color=plt.cm.rainbow(i))
-#
-#ax.plot([distMLA,distMLA],[-MLArad,MLArad],'darkgrey')
-#    
-##axis/size formatting
-#fig.set_size_inches(12,4)
-#ax.spines['left'].set_visible(False)
-#ax.spines['right'].set_visible(False)
-#ax.spines['top'].set_visible(False)
-#ax.spines['bottom'].set_linewidth(1)
-#ax.axes.get_yaxis().set_ticks([])
-##ax.axes.get_xaxis().set_ticks([])
-#plt.xlabel('Distance (mm)', fontdict = font)
-#plt.tight_layout()
-#plt.xlim(((distMLA)-1,(distMLA)+0.25))
-#plt.ylim((-MLArad,MLArad))  
-#if saveVar == 'Y':
-    #plt.savefig('tubeToMLA.png', format='png', dpi=1000)
-
-#plt.show()
-#
-
 ############ Plot Tube to sensor ############
 #fig = plt.gcf()
 #ax = plt.subplot(111)
@@ -175,19 +147,28 @@ plt.show()
 #plt.xlabel('Distance (mm)', fontdict = font)
 #plt.tight_layout()
 #if saveVar == 'Y':
-    #plt.savefig('MLAToSensor.png', format='png', dpi=1000)
+    #plt.savefig('TubeToSensor.png', format='png', dpi=1000)
 
 #plt.show()
 
 
 ########## Plot origin to sensor ############
+    
+data = np.array([propagate_to_tube(init_h,a,init_z) for a in angle],dtype=float)
+data = np.column_stack((data, angle, color_idx))
+data = data[(data[:,0] >= -(tubeRad+10e-10)) & (data[:,0] <= (tubeRad+10e-10)), :]
+    
+
 fig = plt.gcf()
 ax = plt.subplot(111)
 
 for a, i in zip(angle, color_idx):
     ax.plot([init_z*1000,fOb*1000],[init_h,origin(init_h,a,init_z).height],color=plt.cm.rainbow(i))    
     ax.plot([fOb*1000,distTube],[origin(init_h,a,init_z).height,propagate_to_tube(init_h,a,init_z).height],color=plt.cm.rainbow(i))       
+    
+for a, i in zip(data[:,2], data[:,3]):    
     ax.plot([distTube,distSensor],[propagate_to_tube(init_h,a,init_z).height,propagate_to_sensor(init_h,a,init_z).height],color=plt.cm.rainbow(i))
+    
     
 ax.plot([fOb*1000,fOb*1000],[-objRad,objRad],'darkgrey') #objective
 #ax.plot([(fOb*1000)+fT,(fOb*1000)+fT],[-objRad,objRad],'--') #BFP
@@ -234,6 +215,3 @@ if saveVar == 'Y':
     plt.savefig("ic_Histogram_z%s_h%s.png" %(init_z,init_h),format='png', dpi=1000)
     
 plt.show()
-
-    
-
